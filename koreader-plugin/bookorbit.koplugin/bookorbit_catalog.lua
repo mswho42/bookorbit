@@ -100,15 +100,13 @@ end
 local BookOrbitIconButton = IconButton:extend{ file = nil }
 
 function BookOrbitIconButton:init()
-    if not self.file then
-        return IconButton.init(self)
-    end
-
     self.image = IconWidget:new{
+        icon = self.icon,
         file = self.file,
         rotation_angle = self.icon_rotation_angle,
         width = self.width,
         height = self.height,
+        alpha = true,
     }
     self.show_parent = self.show_parent or self
 
@@ -134,6 +132,7 @@ local BookOrbitTitleBar = TitleBar:extend{
     search_icon_allow_flash = true,
     search_icon_enabled = true,
     refresh_icon = nil,
+    refresh_icon_file = nil,
     refresh_icon_tap_callback = nil,
     refresh_icon_hold_callback = nil,
     refresh_icon_allow_flash = true,
@@ -154,6 +153,21 @@ end
 
 function BookOrbitTitleBar:init()
     TitleBar.init(self)
+    for _, button in ipairs({ self.left_button, self.right_button }) do
+        if button then
+            local old_image = button.image
+            button.image = IconWidget:new{
+                icon = button.icon,
+                rotation_angle = button.icon_rotation_angle,
+                width = button.width,
+                height = button.height,
+                alpha = true,
+            }
+            button.horizontal_group[2] = button.image
+            old_image:free()
+            button:update()
+        end
+    end
     -- These are appended after TitleBar has built its own children, so they only
     -- survive as long as that child list does. TitleBar:setTitle re-inits the
     -- whole bar when the title can shrink to fit - which this catalog asks for -
@@ -194,8 +208,9 @@ function BookOrbitTitleBar:init()
     if self.refresh_icon then
         local right_width = self.right_button and self.right_button:getSize().w or 0
         local refresh_width = icon_size + button_padding * 2
-        self.refresh_button = IconButton:new{
+        self.refresh_button = BookOrbitIconButton:new{
             icon = self.refresh_icon,
+            file = self.refresh_icon_file,
             width = icon_size,
             height = icon_size,
             padding = button_padding,
@@ -354,6 +369,11 @@ function BookOrbitCatalog:titleBarRefreshIcon()
     return self:isBulkSelectionActive() and "close" or "cre.render.reload"
 end
 
+function BookOrbitCatalog:titleBarRefreshIconFile()
+    if self:titleBarRefreshIcon() ~= "cre.render.reload" then return nil end
+    return self:pluginAssetFile("cre.render.reload-trans.svg")
+end
+
 -- On the detail page the title bar keeps actions on the left and refresh on
 -- the right; the footer owns back/adjacent-book navigation.
 function BookOrbitCatalog:titleBarLeftIcon()
@@ -407,6 +427,7 @@ function BookOrbitCatalog:buildTitleBar(title, subtitle)
         search_icon_allow_flash = self:titleBarSearchEnabled(),
         search_icon_enabled = self:titleBarSearchEnabled(),
         refresh_icon = self:titleBarRefreshIcon(),
+        refresh_icon_file = self:titleBarRefreshIconFile(),
         refresh_icon_tap_callback = function() self:onRefreshButtonTap() end,
         show_parent = self.show_parent or self,
     }

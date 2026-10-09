@@ -1563,6 +1563,7 @@ function DashboardIconButton:init()
     local icon_opts = iconOrFile(self.entry and self.entry.icon, self.entry and self.entry.icon_file)
     icon_opts.width = icon_size
     icon_opts.height = icon_size
+    icon_opts.alpha = true
     icon_opts.dim = not self.enabled
     self[1] = CatalogWidgets.focusable(CenterContainer:new{
         dimen = Geom:new{ w = self.dimen.w, h = self.dimen.h },
