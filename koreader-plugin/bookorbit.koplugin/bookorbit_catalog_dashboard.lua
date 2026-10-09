@@ -121,7 +121,6 @@ function CatalogDashboard:updateDashboardBackground()
             file_do_cache = false,
             width = self.inner_dimen.w,
             height = self.inner_dimen.h,
-            scale_factor = 0,
             dim = true,
         }
         table.insert(container, 1, image)
