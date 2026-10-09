@@ -17,11 +17,13 @@ Discover rerolls.
 local Blitbuffer = require("ffi/blitbuffer")
 local Button = require("ui/widget/button")
 local CenterContainer = require("ui/widget/container/centercontainer")
+local DocumentRegistry = require("document/documentregistry")
 local Font = require("ui/font")
 local Geom = require("ui/geometry")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan = require("ui/widget/horizontalspan")
 local InfoMessage = require("ui/widget/infomessage")
+local ImageWidget = require("ui/widget/imagewidget")
 local LineWidget = require("ui/widget/linewidget")
 local NetworkMgr = require("ui/network/manager")
 local Screen = require("device").screen
@@ -33,6 +35,7 @@ local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
 local T = require("ffi/util").template
 local _ = require("gettext")
+local lfs = require("libs/libkoreader-lfs")
 
 local Capabilities = require("bookorbit_capabilities")
 local CatalogUtil = require("bookorbit_catalog_util")
@@ -86,6 +89,46 @@ local STATS_BODY_PADDING = 6
 local STATS_ICON_SIZE = 20
 
 local CatalogDashboard = {}
+
+function CatalogDashboard:updateDashboardBackground()
+    local container = self.dashboard_background_container
+    if not container then return end
+
+    local context = self.current_context or {}
+    local path = self.settings.catalog_dashboard_background_image
+    if context.kind ~= "dashboard" or type(path) ~= "string"
+            or lfs.attributes(path, "mode") ~= "file"
+            or not DocumentRegistry:isImageFile(path) then
+        path = nil
+    end
+    if path == self.dashboard_background_path then return end
+
+    if self.dashboard_background_widget then
+        for index, widget in ipairs(container) do
+            if widget == self.dashboard_background_widget then
+                table.remove(container, index)
+                break
+            end
+        end
+        self.dashboard_background_widget:free()
+        self.dashboard_background_widget = nil
+        self.dashboard_background_path = nil
+    end
+
+    if path then
+        local image = ImageWidget:new{
+            file = path,
+            file_do_cache = false,
+            width = self.inner_dimen.w,
+            height = self.inner_dimen.h,
+            scale_factor = 0,
+            dim = true,
+        }
+        table.insert(container, 1, image)
+        self.dashboard_background_widget = image
+        self.dashboard_background_path = path
+    end
+end
 
 local function isDashboardUnsupported(err)
     return err == 404 or err == 405

@@ -110,6 +110,7 @@ BookOrbit.default_settings = {
     catalog_grid_cols = 4,
     catalog_grid_rows = 3,
     catalog_mosaic_show_titles = false,
+    catalog_dashboard_background_image = nil,
     catalog_recent_searches = {},
     catalog_auto_open = "off",
     catalog_dashboard_cache = nil,

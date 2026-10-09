@@ -7,6 +7,8 @@ onto the plugin controller as regular methods.
 ]]
 
 local Device = require("device")
+local DocumentRegistry = require("document/documentregistry")
+local FileChooser = require("ui/widget/filechooser")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
 local MultiInputDialog = require("ui/widget/multiinputdialog")
@@ -14,6 +16,7 @@ local NetworkMgr = require("ui/network/manager")
 local Notification = require("ui/widget/notification")
 local UIManager = require("ui/uimanager")
 local md5 = require("ffi/sha2").md5
+local lfs = require("libs/libkoreader-lfs")
 local util = require("util")
 local T = require("ffi/util").template
 local _ = require("gettext")
@@ -398,6 +401,26 @@ function MainMenu:dashboardSettingsMenu(catalog)
             sub_item_table = self:catalogAutoOpenMenu(),
         },
         {
+            text_func = function()
+                local path = self.settings.catalog_dashboard_background_image
+                local filename = type(path) == "string" and path:match("([^/]+)$")
+                return T(_("Custom background (%1)"), filename or _("off"))
+            end,
+            help_text = _("Choose an image to display behind the BookOrbit dashboard."),
+            callback = function()
+                self:chooseDashboardBackground(catalog)
+            end,
+        },
+        {
+            text = _("Remove custom background"),
+            enabled_func = function()
+                return type(self.settings.catalog_dashboard_background_image) == "string"
+            end,
+            callback = function()
+                self:setDashboardBackground(nil, catalog)
+            end,
+        },
+        {
             text = _("Tap Continue reading to open the book"),
             checked_func = function()
                 return self.settings.catalog_dashboard_tap_resumes ~= false
@@ -424,6 +447,41 @@ function MainMenu:dashboardSettingsMenu(catalog)
         end,
     })
     return items
+end
+
+function MainMenu:chooseDashboardBackground(catalog)
+    local path = self.settings.catalog_dashboard_background_image
+    local initial_dir = type(path) == "string" and path:match("^(.*)/[^/]+$")
+    if not initial_dir or initial_dir == "" then
+        initial_dir = G_reader_settings:readSetting("home_dir") or lfs.currentdir()
+    end
+    local chooser = FileChooser:new{
+        ui = self.ui,
+        path = initial_dir,
+        title = _("Choose dashboard background"),
+        file_filter = function(filename)
+            return DocumentRegistry:isImageFile(filename)
+        end,
+    }
+    function chooser:onFileSelect(item)
+        UIManager:close(self)
+        self.on_background_selected(item.path)
+        return true
+    end
+    chooser.on_background_selected = function(selected_path)
+        self:setDashboardBackground(selected_path, catalog)
+    end
+    UIManager:show(chooser)
+end
+
+function MainMenu:setDashboardBackground(path, catalog)
+    if catalog then
+        catalog:persistSetting("catalog_dashboard_background_image", path)
+    else
+        self.settings.catalog_dashboard_background_image = path
+        G_reader_settings:flush()
+    end
+    if catalog and not catalog.catalog_closed then catalog:updateItems() end
 end
 
 function MainMenu:syncSettingsMenu(has_open_book)

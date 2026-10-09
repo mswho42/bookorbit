@@ -300,6 +300,8 @@ function BookOrbitCatalog:init()
     self.title_bar_fm_style = true
     self.custom_title_bar = self:buildTitleBar(self.current_context.title or self.title, self.current_context.subtitle or "")
     Menu.init(self)
+    self.dashboard_background_container = self[1][1]
+    self:updateDashboardBackground()
     self:updateLeftIcon()
     if self:dashboardMode() then
         self:scheduleThumbnailDownloads(self.dashboardBooks(self.current_context.dashboard))
@@ -1982,6 +1984,7 @@ function BookOrbitCatalog:recalculateMosaicDimen()
 end
 
 function BookOrbitCatalog:updateItems(select_number, no_recalculate_dimen)
+    self:updateDashboardBackground()
     if self:dashboardMode() then
         return self:updateDashboardItems(select_number, no_recalculate_dimen)
     elseif self:bookMode() then
