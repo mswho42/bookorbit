@@ -1105,6 +1105,11 @@ function BookOrbit:openCatalogBrowser(prefer_cached_dashboard)
         show_dashboard_menu = function(catalog)
             self:showDashboardMenu(catalog)
         end,
+        show_system_menu = function()
+            if self.ui and self.ui.menu then
+                self.ui.menu:onShowMenu()
+            end
+        end,
         _manager = self,
         close_callback = function()
             UIManager:close(self.catalog_browser)

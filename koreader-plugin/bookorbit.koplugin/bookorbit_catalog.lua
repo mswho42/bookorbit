@@ -362,7 +362,7 @@ function BookOrbitCatalog:titleBarLeftIcon()
 end
 
 function BookOrbitCatalog:titleBarRightIcon()
-    return nil
+    return self:dashboardMode() and "appbar.settings" or nil
 end
 
 function BookOrbitCatalog:buildTitleBar(title, subtitle)
@@ -1747,6 +1747,9 @@ function BookOrbitCatalog:onLeftButtonHold()
 end
 
 function BookOrbitCatalog:onRightButtonTap()
+    if self:dashboardMode() and self.show_system_menu then
+        self.show_system_menu()
+    end
     return true
 end
 
