@@ -94,25 +94,19 @@ function CatalogDashboard:updateDashboardBackground()
     local container = self.dashboard_background_container
     if not container then return end
 
+    -- Keep the background layer stable across dashboard refreshes. Re-inserting
+    -- the same image into the content container reorders the widget stack and
+    -- shifts the dashboard rows after a refresh.
+    if self.dashboard_background_widget then
+        return
+    end
+
     local context = self.current_context or {}
     local path = self.settings.catalog_dashboard_background_image
     if context.kind ~= "dashboard" or type(path) ~= "string"
             or lfs.attributes(path, "mode") ~= "file"
             or not DocumentRegistry:isImageFile(path) then
         path = nil
-    end
-    if path == self.dashboard_background_path then return end
-
-    if self.dashboard_background_widget then
-        for index, widget in ipairs(container) do
-            if widget == self.dashboard_background_widget then
-                table.remove(container, index)
-                break
-            end
-        end
-        self.dashboard_background_widget:free()
-        self.dashboard_background_widget = nil
-        self.dashboard_background_path = nil
     end
 
     if path then
@@ -1022,7 +1016,9 @@ function CatalogDashboard:updateDashboardItems(select_number, no_recalculate_dim
     if context.stale and not context.loading and context.dashboard then
         status_widget = self:buildDashboardStatusLine(dashboard)
     end
-    local status_h = status_widget and (status_widget:getSize().h + compact_gap) or 0
+    local status_h = status_widget and (status_widget:getSize().h + compact_gap)
+        or (self.dashboard_status_h or 0)
+    self.dashboard_status_h = status_widget and status_h or self.dashboard_status_h
 
     local configs = {}
     local stats_widgets = {}
@@ -1138,6 +1134,8 @@ function CatalogDashboard:updateDashboardItems(select_number, no_recalculate_dim
     if status_widget then
         self:addDashboardInset(status_widget)
         self:addDashboardSpacer(compact_gap)
+    elseif status_h > 0 then
+        self:addDashboardSpacer(status_h)
     end
     local function renderStats(index)
         self:addDashboardInset(stats_widgets[index])
