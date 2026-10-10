@@ -1123,6 +1123,7 @@ function DashboardHeroCard:init()
 
     local title_face = Font:getFace("cfont", 16)
     local author_face = Font:getFace("cfont", 12)
+    local description_face = Font:getFace("smallinfofont", 11)
     local meta_face = Font:getFace("cfont", 10)
 
     local top = VerticalGroup:new{ align = "left" }
@@ -1144,6 +1145,35 @@ function DashboardHeroCard:init()
             height = lineHeight(author_face),
             height_overflow_show_ellipsis = true,
             face = author_face,
+        })
+    end
+
+    local description = nil
+    if book then
+        description = book.description
+        if type(description) ~= "string" or description == "" then
+            local detail = self.menu and self.menu.cachedBookDetail and self.menu:cachedBookDetail(book.id)
+            if type(detail) == "table" and type(detail.description) == "string" then
+                description = detail.description
+            else
+                description = nil
+            end
+        end
+        if type(description) == "string" then
+            description = CatalogUtil.cleanDescriptionText(description)
+        end
+    end
+    if description then
+        local description_text = shortText(description, 180)
+        table.insert(top, VerticalSpan:new{ width = Size.span.vertical_default })
+        table.insert(top, TextBoxWidget:new{
+            text = BD.auto(description_text),
+            width = text_w,
+            height = 2 * lineHeight(description_face),
+            height_adjust = true,
+            height_overflow_show_ellipsis = true,
+            fgcolor = Blitbuffer.COLOR_DARK_GRAY,
+            face = description_face,
         })
     end
 
