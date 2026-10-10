@@ -54,6 +54,16 @@ local READ_STATUS_BADGE_ICONS = {
 
 local CatalogWidgets = {}
 
+local DASHBOARD_TEXT_SCALE = 1.5
+
+local function dashboardFontSize(base_size)
+    return math.max(8, math.floor((base_size or 10) * DASHBOARD_TEXT_SCALE + 0.5))
+end
+
+local function dashboardFace(face_name, base_size)
+    return Font:getFace(face_name, dashboardFontSize(base_size))
+end
+
 -- Mirrors TextBoxWidget's own line height math so text blocks can be sized in
 -- whole lines (same helper as the detail page uses).
 local function lineHeight(face)
@@ -688,8 +698,8 @@ local CAPTION_SUB_FONT_SIZE = 11
 
 -- Height of the two-line caption block a captioned cover card reserves.
 function CatalogWidgets.coverCaptionHeight()
-    return lineHeight(Font:getFace("cfont", CAPTION_TITLE_FONT_SIZE))
-        + lineHeight(Font:getFace("cfont", CAPTION_SUB_FONT_SIZE))
+    return lineHeight(dashboardFace("cfont", CAPTION_TITLE_FONT_SIZE))
+        + lineHeight(dashboardFace("cfont", CAPTION_SUB_FONT_SIZE))
         + Size.span.vertical_default
 end
 
@@ -821,7 +831,7 @@ local SECTION_HEADER_FONT_SIZE = 14
 function CatalogWidgets.dashboardSectionHeaderRowHeight()
     local probe = TextWidget:new{
         text = "X",
-        face = Font:getFace("cfont", SECTION_HEADER_FONT_SIZE),
+        face = dashboardFace("cfont", SECTION_HEADER_FONT_SIZE),
         bold = true,
     }
     local height = probe:getSize().h
@@ -839,7 +849,7 @@ function CatalogWidgets.buildDashboardSectionHeader(text, width, right_widget)
     local gap = right_widget and Size.span.horizontal_default or 0
     local label = TextWidget:new{
         text = string.upper(text or ""),
-        face = Font:getFace("cfont", SECTION_HEADER_FONT_SIZE),
+        face = dashboardFace("cfont", SECTION_HEADER_FONT_SIZE),
         bold = true,
         max_width = math.max(1, width - right_w - gap),
     }
@@ -887,12 +897,12 @@ local STAT_LABEL_FONT_SIZE = 10
 function CatalogWidgets.dashboardStatMetrics(spark_h)
     local value_probe = TextWidget:new{
         text = "0",
-        face = Font:getFace("cfont", STAT_VALUE_FONT_SIZE),
+        face = dashboardFace("cfont", STAT_VALUE_FONT_SIZE),
         bold = true,
     }
     local label_probe = TextWidget:new{
         text = "X",
-        face = Font:getFace("cfont", STAT_LABEL_FONT_SIZE),
+        face = dashboardFace("cfont", STAT_LABEL_FONT_SIZE),
     }
     local metrics = {
         value_h = value_probe:getSize().h,
@@ -918,7 +928,7 @@ function CatalogWidgets.buildDashboardStat(value, label, width, extra, metrics)
             dimen = Geom:new{ w = width, h = metrics.value_h },
             TextWidget:new{
                 text = value or "",
-                face = Font:getFace("cfont", STAT_VALUE_FONT_SIZE),
+                face = dashboardFace("cfont", STAT_VALUE_FONT_SIZE),
                 bold = true,
                 max_width = width,
             },
@@ -940,7 +950,7 @@ function CatalogWidgets.buildDashboardStat(value, label, width, extra, metrics)
         dimen = Geom:new{ w = width, h = metrics.label_h },
         TextWidget:new{
             text = string.upper(label or ""),
-            face = Font:getFace("cfont", STAT_LABEL_FONT_SIZE),
+            face = dashboardFace("cfont", STAT_LABEL_FONT_SIZE),
             fgcolor = Blitbuffer.COLOR_DARK_GRAY,
             max_width = width,
         },
@@ -992,7 +1002,7 @@ function CatalogWidgets.buildStatusLabel(text, width, height, alignment)
         height = height,
         alignment = alignment or "left",
         fgcolor = Blitbuffer.COLOR_DARK_GRAY,
-        face = Font:getFace("xx_smallinfofont"),
+        face = dashboardFace("xx_smallinfofont", 11),
         height_overflow_show_ellipsis = true,
     }
 end
@@ -1049,8 +1059,8 @@ function DashboardCoverCard:init()
         end
     end
     if with_caption then
-        local title_face = Font:getFace("cfont", CAPTION_TITLE_FONT_SIZE)
-        local sub_face = Font:getFace("cfont", CAPTION_SUB_FONT_SIZE)
+        local title_face = dashboardFace("cfont", CAPTION_TITLE_FONT_SIZE)
+        local sub_face = dashboardFace("cfont", CAPTION_SUB_FONT_SIZE)
         local sub_text = hasProgress(book) and formatProgress(book.progressPercentage)
             or (book and firstAuthor(book)) or ""
         table.insert(col, VerticalSpan:new{ width = Size.span.vertical_default })
@@ -1121,10 +1131,10 @@ function DashboardHeroCard:init()
     local path, state = self.menu:thumbnailDisplay(book)
     local downloaded = self.menu:isOnDevice(book)
 
-    local title_face = Font:getFace("cfont", 16)
-    local author_face = Font:getFace("cfont", 12)
-    local description_face = Font:getFace("smallinfofont", 11)
-    local meta_face = Font:getFace("cfont", 10)
+    local title_face = dashboardFace("cfont", 16)
+    local author_face = dashboardFace("cfont", 12)
+    local description_face = dashboardFace("smallinfofont", 11)
+    local meta_face = dashboardFace("cfont", 10)
 
     local top = VerticalGroup:new{ align = "left" }
     table.insert(top, TextBoxWidget:new{
@@ -1229,8 +1239,8 @@ local HIGHLIGHT_ATTRIBUTION_FONT_SIZE = 11
 -- the card before committing vertical budget to it.
 function CatalogWidgets.buildDashboardHighlightContent(highlight, width)
     highlight = highlight or {}
-    local quote_face = Font:getFace("cfont", HIGHLIGHT_QUOTE_FONT_SIZE)
-    local attribution_face = Font:getFace("cfont", HIGHLIGHT_ATTRIBUTION_FONT_SIZE)
+    local quote_face = dashboardFace("cfont", HIGHLIGHT_QUOTE_FONT_SIZE)
+    local attribution_face = dashboardFace("cfont", HIGHLIGHT_ATTRIBUTION_FONT_SIZE)
     local content = VerticalGroup:new{ align = "left" }
     table.insert(content, TextBoxWidget:new{
         text = BD.auto("“" .. shortText(highlight.text or "", 240) .. "”"),
