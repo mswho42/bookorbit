@@ -623,11 +623,11 @@ function CatalogDashboard:buildDashboardHeroCard(book, width, height)
     }
 end
 
--- Hero cards per page: two side by side, one on narrow screens or when only
--- one book is in progress.
-function CatalogDashboard:dashboardHeroSlots(count)
-    if count <= 1 then return 1 end
-    return self.content_w >= Screen:scaleBySize(420) and 2 or 1
+-- Continue reading is displayed as a single large hero so the featured book is
+-- emphasized and the cover stays oversized instead of being split into a two-up
+-- row.
+function CatalogDashboard:dashboardHeroSlots(_count)
+    return 1
 end
 
 -- The Continue-reading hero row: full-width hero cards side by side, paged
@@ -1016,7 +1016,7 @@ function CatalogDashboard:updateDashboardItems(select_number, no_recalculate_dim
     local browse_rows = 3
     -- A provisional height: once the shelves have settled their column width the
     -- hero is re-sized from their cover, below.
-    local hero_h = math.min(px(HERO_MAX_HEIGHT), math.max(px(HERO_MIN_HEIGHT), math.floor(avail * 0.18)))
+    local hero_h = math.min(px(HERO_MAX_HEIGHT) * 2, math.max(px(HERO_MIN_HEIGHT) * 2, math.floor(avail * 0.18) * 2))
 
     local status_widget
     if context.stale and not context.loading and context.dashboard then

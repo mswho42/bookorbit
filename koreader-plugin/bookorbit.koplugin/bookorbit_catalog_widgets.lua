@@ -1115,7 +1115,7 @@ function DashboardHeroCard:init()
     local inner_w = math.max(1, self.dimen.w - 2 * pad - 2 * CARD_BORDER)
     local inner_h = math.max(1, self.dimen.h - 2 * pad - 2 * CARD_BORDER)
     local cover_h = inner_h
-    local cover_w = math.min(math.floor(inner_w * 0.32), math.floor(cover_h * COVER_ASPECT))
+    local cover_w = math.min(math.floor(inner_w * 0.60), math.floor(cover_h * COVER_ASPECT))
     local text_w = math.max(1, inner_w - cover_w - gap)
 
     local path, state = self.menu:thumbnailDisplay(book)

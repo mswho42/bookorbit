@@ -1,11 +1,11 @@
 --[[--
-Registry for the four configurable dashboard slots.
+Registry for the configurable dashboard slots.
 
 Each source keeps its native renderer: Stats is a strip, Continue reading is a
-hero row, book sources are cover grids, and Browse is the compact action list.
-A book source is fully described by its type plus, for the sources picked
-through a catalog list, the filter that was selected. The stored value is an
-ordered list matching the four dashboard slots.
+hero row, and book sources are cover grids. A book source is fully described by
+its type plus, for the sources picked through a catalog list, the filter that
+was selected. The stored value is an ordered list matching the active dashboard
+slots.
 
 The selected entry's name is cached alongside its filter purely so the settings
 menu and the section header can label the slot without a request.
@@ -21,12 +21,11 @@ DashboardSections.SETTING_KEY = "catalog_dashboard_sections"
 DashboardSections.DEFAULT_TYPE = "random"
 DashboardSections.SCHEMA_VERSION = 2
 DashboardSections.LEGACY_SCHEMA_VERSION = 1
-DashboardSections.SLOT_COUNT = 4
+DashboardSections.SLOT_COUNT = 3
 DashboardSections.DEFAULT_SLOTS = {
     { type = "stats" },
     { type = "continue-reading" },
     { type = "random" },
-    { type = "browse" },
 }
 
 -- Order here mirrors the destinations exposed by the dashboard Browse block.
